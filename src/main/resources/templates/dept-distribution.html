@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Department Distribution</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #003366; color: white; padding: 15px 30px; }
+        .nav { background: #002244; padding: 10px 30px; display: flex; gap: 20px; flex-wrap: wrap; }
+        .nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; }
+        .nav a:hover { background: #003366; }
+        .container { padding: 30px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; background: #003366; color: white; margin-right: 10px; }
+        .btn-print { background: #28a745; }
+        .report-header { margin-bottom: 20px; }
+        .report-header h2 { color: #003366; margin-bottom: 5px; }
+        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .dept-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+        .dept-name { font-weight: bold; color: #003366; }
+        .dept-count { background: #003366; color: white; padding: 3px 10px; border-radius: 20px; }
+        .total { margin-top: 15px; padding-top: 15px; border-top: 2px solid #003366; font-weight: bold; display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏢 Department Distribution Report</h1>
+    </div>
+    
+    <div class="nav">
+        <a href="/">📊 Dashboard</a>
+        <a href="/devices">💻 Devices</a>
+        <a href="/employees">👥 Employees</a>
+        <a href="/assignments">📋 Assignments</a>
+        <a href="/reports">📈 Reports</a>
+        <a href="/audit">🔍 Audit Trail</a>
+    </div>
+    
+    <div class="container">
+        <div class="report-header">
+            <h2 th:text="${reportTitle}">Device Distribution by Department</h2>
+            <p>Generated on: <span th:text="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd HH:mm:ss')}"></span></p>
+        </div>
+        
+        <div>
+            <button onclick="window.print()" class="btn btn-print">🖨️ Print</button>
+            <a href="/reports" class="btn">↩️ Back</a>
+        </div>
+        
+        <div class="card">
+            <h3 style="color: #003366; margin-bottom: 15px;">📊 Devices per Department</h3>
+            
+            <div th:each="entry : ${distribution}">
+                <div class="dept-item">
+                    <span class="dept-name" th:text="${entry.key}">Department</span>
+                    <span class="dept-count" th:text="${entry.value} + ' devices'">0</span>
+                </div>
+            </div>
+            
+            <div th:if="${distribution.empty}">
+                <div class="dept-item">
+                    <span>No active assignments found</span>
+                </div>
+            </div>
+            
+            <div class="total">
+                <span>Total Devices Assigned:</span>
+                <span th:text="${#aggregates.sum(distribution.values())}">0</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

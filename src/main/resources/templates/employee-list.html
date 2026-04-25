@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Employee Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #003366; color: white; padding: 15px 30px; }
+        .nav { background: #002244; padding: 10px 30px; display: flex; gap: 20px; }
+        .nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; }
+        .nav a:hover { background: #003366; }
+        .container { padding: 30px; }
+        .message { padding: 10px 15px; border-radius: 5px; margin-bottom: 20px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .form-container { background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #003366; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #003366; color: white; }
+        .search-bar { display: flex; gap: 10px; margin-bottom: 20px; }
+        .search-bar input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .active-badge { background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+        .inactive-badge { background: #dc3545; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👥 Employee Management</h1>
+    </div>
+    
+    <div class="nav">
+        <a href="/">📊 Dashboard</a>
+        <a href="/devices">💻 Devices</a>
+        <a href="/employees">👥 Employees</a>
+        <a href="/assignments">📋 Assignments</a>
+        <a href="/reports">📈 Reports</a>
+        <a href="/audit">🔍 Audit Log</a>
+    </div>
+    
+    <div class="container">
+        <div th:if="${success}" class="message success" th:text="${success}"></div>
+        <div th:if="${error}" class="message error" th:text="${error}"></div>
+        
+        <!-- Add Employee Form -->
+        <div class="form-container">
+            <h3>➕ Add New Employee</h3>
+            <form action="/employees/save" method="post" th:object="${newEmployee}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Employee Code *</label>
+                        <input type="text" name="employeeCode" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" name="fullName" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Department *</label>
+                        <input type="text" name="department" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input type="text" name="role">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="email">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" name="phoneNumber">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">💾 Save Employee</button>
+            </form>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <form action="/employees/search" method="get" style="flex: 1; display: flex; gap: 10px;">
+                <input type="text" name="keyword" placeholder="Search by name, code, or department..." th:value="${searchKeyword}">
+                <button type="submit" class="btn btn-primary">🔍 Search</button>
+            </form>
+            <a href="/employees" class="btn btn-primary">🔄 Reset</a>
+        </div>
+        
+        <!-- Employees Table -->
+         <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="emp : ${employees}">
+                    <td th:text="${emp.id}">-</td>
+                    <td th:text="${emp.employeeCode}">-</td>
+                    <td th:text="${emp.fullName}">-</td>
+                    <td th:text="${emp.department}">-</td>
+                    <td th:text="${emp.role}">-</td>
+                    <td th:text="${emp.email}">-</td>
+                    <td th:text="${emp.phoneNumber}">-</td>
+                    <td>
+                        <span th:if="${emp.isActive}" class="active-badge">Active</span>
+                        <span th:unless="${emp.isActive}" class="inactive-badge">Inactive</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/employees/edit/{id}(id=${emp.id})}" class="btn btn-warning btn-sm">Edit</a>
+                        <a th:href="@{/employees/toggle/{id}(id=${emp.id})}" class="btn btn-primary btn-sm">Toggle</a>
+                        <a th:href="@{/employees/delete/{id}(id=${emp.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this employee?')">Delete</a>
+                    </td>
+                </tr>
+                <tr th:if="${employees.empty}">
+                    <td colspan="9" style="text-align: center;">No employees found. Add your first employee above.</td>
+                </tr>
+            </tbody>
+         </table>
+    </div>
+</body>
+</html>

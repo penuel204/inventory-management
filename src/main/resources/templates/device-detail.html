@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Device Details</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #003366; color: white; padding: 15px 30px; }
+        .nav { background: #002244; padding: 10px 30px; display: flex; gap: 20px; flex-wrap: wrap; }
+        .nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; }
+        .nav a:hover { background: #003366; }
+        .container { max-width: 800px; margin: 30px auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .detail-table { width: 100%; border-collapse: collapse; }
+        .detail-table th, .detail-table td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        .detail-table th { width: 30%; background: #f5f5f5; }
+        .status-badge { padding: 3px 8px; border-radius: 3px; font-size: 12px; display: inline-block; }
+        .status-Available { background: #28a745; color: white; }
+        .status-Assigned { background: #ffc107; color: #333; }
+        .status-Under_Repair { background: #dc3545; color: white; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; margin-right: 10px; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-secondary { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📱 Device Details</h1>
+    </div>
+    
+    <div class="nav">
+        <a href="/">📊 Dashboard</a>
+        <a href="/devices">💻 Devices</a>
+        <a href="/employees">👥 Employees</a>
+        <a href="/assignments">📋 Assignments</a>
+    </div>
+    
+    <div class="container">
+        <h2>Device Information</h2>
+        
+        <table class="detail-table">
+            <tr>
+                <th>Device ID</th>
+                <td th:text="${device.id}">-</td>
+            </tr>
+            <tr>
+                <th>Serial Number</th>
+                <td th:text="${device.serialNumber}">-</td>
+            </tr>
+            <tr>
+                <th>Device Type</th>
+                <td th:text="${device.deviceType}">-</td>
+            </tr>
+            <tr>
+                <th>Make/Brand</th>
+                <td th:text="${device.make}">-</td>
+            </tr>
+            <tr>
+                <th>Model</th>
+                <td th:text="${device.model}">-</td>
+            </tr>
+            <tr>
+                <th>Specifications</th>
+                <td th:text="${device.specifications}">-</td>
+            </tr>
+            <tr>
+                <th>Condition</th>
+                <td><span class="status-badge" th:text="${device.deviceCondition}"></span></td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td><span class="status-badge" th:class="'status-badge status-' + ${device.status?.replace(' ', '_')}" th:text="${device.status}"></span></td>
+            </tr>
+            <tr>
+                <th>Purchase Date</th>
+                <td th:text="${device.purchaseDate}">-</td>
+            </tr>
+            <tr>
+                <th>Created At</th>
+                <td th:text="${device.createdAt}">-</td>
+            </tr>
+            <tr>
+                <th>Last Updated</th>
+                <td th:text="${device.updatedAt}">-</td>
+            </tr>
+        </table>
+        
+        <div style="margin-top: 20px;">
+            <a th:href="@{/devices/edit/{id}(id=${device.id})}" class="btn btn-warning">✏️ Edit Device</a>
+            <a href="/devices" class="btn btn-secondary">↩️ Back to List</a>
+        </div>
+    </div>
+</body>
+</html>

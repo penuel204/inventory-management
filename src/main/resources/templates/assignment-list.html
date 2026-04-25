@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Assignment Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5; }
+        .header { background: #003366; color: white; padding: 15px 30px; }
+        .nav { background: #002244; padding: 10px 30px; display: flex; gap: 20px; }
+        .nav a { color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; }
+        .nav a:hover { background: #003366; }
+        .container { padding: 30px; }
+        .message { padding: 10px 15px; border-radius: 5px; margin-bottom: 20px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .form-container { background: white; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #003366; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: #333; }
+        .btn-sm { padding: 5px 10px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; margin-bottom: 30px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #003366; color: white; }
+        .section-title { margin: 20px 0 10px 0; color: #003366; }
+        .badge-active { background: #28a745; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+        .badge-returned { background: #6c757d; color: white; padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Assignment Management</h1>
+    </div>
+    
+    <div class="nav">
+        <a href="/">📊 Dashboard</a>
+        <a href="/devices">💻 Devices</a>
+        <a href="/employees">👥 Employees</a>
+        <a href="/assignments">📋 Assignments</a>
+        <a href="/reports">📈 Reports</a>
+        <a href="/audit">🔍 Audit Log</a>
+    </div>
+    
+    <div class="container">
+        <div th:if="${success}" class="message success" th:text="${success}"></div>
+        <div th:if="${error}" class="message error" th:text="${error}"></div>
+        
+        <!-- Assign Device Form -->
+        <div class="form-container">
+            <h3>📌 Assign Device to Employee</h3>
+            <form action="/assignments/assign" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Select Device *</label>
+                        <select name="deviceId" required>
+                            <option value="">-- Select Device --</option>
+                            <option th:each="device : ${availableDevices}" 
+                                    th:value="${device.id}" 
+                                    th:text="${device.serialNumber} + ' - ' + ${device.make} + ' ' + ${device.model}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Employee *</label>
+                        <select name="employeeId" required>
+                            <option value="">-- Select Employee --</option>
+                            <option th:each="emp : ${activeEmployees}" 
+                                    th:value="${emp.id}" 
+                                    th:text="${emp.employeeCode} + ' - ' + ${emp.fullName} + ' (' + ${emp.department} + ')'">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Device Condition</label>
+                        <select name="condition">
+                            <option value="New">New</option>
+                            <option value="Good">Good</option>
+                            <option value="Fair">Fair</option>
+                            <option value="Damaged">Damaged</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea name="notes" rows="2" placeholder="Additional notes..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">✅ Assign Device</button>
+            </form>
+        </div>
+        
+        <!-- Current Assignments -->
+        <h3 class="section-title">🔄 Current Active Assignments</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Device</th>
+                    <th>Serial No</th>
+                    <th>Assigned To</th>
+                    <th>Department</th>
+                    <th>Assigned Date</th>
+                    <th>Condition</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="assignment : ${currentAssignments}">
+                    <td th:text="${assignment.device.make} + ' ' + ${assignment.device.model}">-</td>
+                    <td th:text="${assignment.device.serialNumber}">-</td>
+                    <td th:text="${assignment.employee.fullName}">-</td>
+                    <td th:text="${assignment.employee.department}">-</td>
+                    <td th:text="${#temporals.format(assignment.assignedDate, 'yyyy-MM-dd HH:mm')}">-</td>
+                    <td th:text="${assignment.conditionAtAssignment}">-</td>
+                    <td>
+                        <a th:href="@{/assignments/return/{id}(id=${assignment.device.id})}" 
+                           class="btn btn-warning btn-sm" 
+                           onclick="return confirm('Return this device?')">↩️ Return</a>
+                    </td>
+                </tr>
+                <tr th:if="${currentAssignments.empty}">
+                    <td colspan="7" style="text-align: center;">No active assignments. Assign a device above.</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- Assignment History -->
+        <h3 class="section-title">📜 Assignment History</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Device</th>
+                    <th>Serial No</th>
+                    <th>Employee</th>
+                    <th>Assigned Date</th>
+                    <th>Returned Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="assignment : ${allAssignments}">
+                    <td th:text="${assignment.device.make} + ' ' + ${assignment.device.model}">-</td>
+                    <td th:text="${assignment.device.serialNumber}">-</td>
+                    <td th:text="${assignment.employee.fullName}">-</td>
+                    <td th:text="${#temporals.format(assignment.assignedDate, 'yyyy-MM-dd HH:mm')}">-</td>
+                    <td th:text="${assignment.returnedDate != null ? #temporals.format(assignment.returnedDate, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+                    <td>
+                        <span th:if="${assignment.returnedDate == null}" class="badge-active">Active</span>
+                        <span th:unless="${assignment.returnedDate == null}" class="badge-returned">Returned</span>
+                    </td>
+                </tr>
+                <tr th:if="${allAssignments.empty}">
+                    <td colspan="6" style="text-align: center;">No assignment history found.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
